@@ -1,0 +1,137 @@
+Glosario de comandos: Linux
+Ver configuracion actual de todas las interfaces
+ifconfig
+ifconfig [interface] [up/down]
+ifconfig eth0
+Levantar interfaz virtual
+ifconfig eth0:0
+Asignar ip y mascara a interfaz (si no va la mascara, toma la por defecto de la clase de ip)
+ifconfig [interface] [ip] netmask [mascara]
+ifconfig eth0 10.0.0.2 netmask 255.0.0.0
+
+Consulta la tabla de enrutamiento (de todas las interfaces)
+route
+Agrega de manera estatica una manera de llegar a tal red o host (si es especifica host, netmask no va), el gateway puede no ir, el dev indica por qué interfaz enrutar.
+route add [-net/-host] [ip] netmask [mascara] gw [gateway] dev [interface]
+
+IPv6: Linux
+Agregar dir. ipv6 a interfaz
+ifconfig [interface] add [ipv6/prefijo]
+ip addr add [ipv6/prefijo] dev [interface]
+
+Mostrar direcciones ipv6
+ip -6 addr show
+
+Ping 6 a dir. global
+ping6 [ipv6 global unicast]
+
+Ping -6 por local de enlace (hace falta especificar la interfaz)
+ping6 -l [interface] [ipv6 local enlace]
+
+route -A inet6 add [ipv6] [gw [gateway]] dev [interface]
+
+
+
+Glosario de comandos: Windows:
+Agregar una red a por encaminamiento estatico:
+route ADD [ipred] MASK [mascara] [gw] METRIC [metrica] IF [numero de interface]
+
+IPv6: Windows
+Agregar ipv6 a interfaz
+netsh interface ipv6 add address [ipv6]
+
+Eliminar
+netsh interface ipv6 delete address [ipv6]
+
+Mostrar
+netsh interface ipv6 show address
+
+Ping
+ping6 [ipv6]
+
+Funciones con DNS
+nslookup
+
+Consulta la tabla ARP
+arp
+Elimina un entrada
+arp -d [ip]
+Agrega una entrada
+arp -s [ip] [mac]
+
+
+
+Glosario de comandos: Router Cisco
+
+Comandos basicos:
+Ambos muestra: hostname, version, intefaces (ip, mascara, clock rate) y lineas activas ara configuracion remota.
+>show startup-config
+>show running-config
+
+Muesta la tabla ARP para cad interfaz
+>show arp
+
+Muestra info de todas (o una) interfaces: ip, mascara, estado, MTU, MAC, estadisticas (muchas lineas de informacion).
+>show interfaces
+>show interfaces [fastethernet 0/1]
+
+Muestra resumen del estado de interfaces: ip, mascara, estado.
+>show protocols
+
+Muestra info del router
+>show version
+
+Muestra la tabla de encaminamiento: como se aprendio, desde cuando se actualizo, ip de red, ip de prox salto o interfaz de salida, metrica, distancia administrativa.
+>show ip route
+
+Config de acceso:
+(config)#line console 0
+(config)#password [hyterterminal como ej]
+(config)#login
+
+(config)#line vty 0 4
+(config)#password [telnet como ej]
+(config)#login
+
+Backup de la config actual al archivo de inicio:
+#copy running-config startup-config
+
+Enrutamienta:
+
+>hostname [nombre]
+
+>enable
+#configure terminal
+(config)#interface [tipo] [ranura/indice]
+(config)#interface fastEthernet 0/0
+(config-if)#ip address [ip] [mascara]
+//Solo para conexiones serie donde es DCE
+[(config-if)#clock rate [64000 baudios]]
+(config-if)#no shutdown
+
+Tabla de enrutamiento:
+(config)#ip route [ip] [mascara] [interface de salida/ip del prox salto]
+Qué protocolo voy a configurar
+#router [protocolo]
+Qué redes voy a anunciar (o publicar ante los intercambios por el algoritmo de encaminamiento)
+(config-router)#network [ip]
+
+RIP:
+#router rip
+(config-router)#network [ip]
+(config-router)#version 2
+RIPv1 es classful, trabaja con mascaras de subred pero no con VLSM o CIDR, por lo que no las envia entre intercambios.
+RIPv2 es classless (funciona con CIDR y VLSM), pero no se anuncian las mascaras porque se "autofiltra" usando la mascara configurada en cada interfaz.
+Esto es posible con el comando:
+(config-router)#no auto-summary
+
+OSPF:
+#router ospf [numero de proceso]
+(config-router)#network [ip] [mask [mascara]] [wildcard] area [numero de area]
+Las wildcard son la inversa de las mascaras de red. El area es porque se trata de un protocolo jerarquico, la 0 es la troncal.
+
+BGP:
+#router bgp [numero de sa]
+(config-router)#neighbor [ip de la boca que conecto] remote-as [numero de sa]
+Anuncio las que conozco
+(config-router)#network [ip] mask [mascara]
